@@ -21,13 +21,17 @@ public class Model {
 		return EventsDao.listAllMonths();
 	}
 
-	public void creaGrafo(String OffenseCategoryId, Integer month) {
+	public void creaGrafo(String offenseCategoryId, Integer month) {
 		this.graph = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
 		// vertici
-		Graphs.addAllVertices(this.graph, EventsDao.getTypeByCategoryAndMonth(OffenseCategoryId, month));
+		Graphs.addAllVertices(this.graph, EventsDao.getTypeByCategoryAndMonth(offenseCategoryId, month));
 
-		System.out.println(this.graph);
+		// lati
+		for (Pair p : EventsDao.getPairs(offenseCategoryId, month)) {
+			this.graph.addEdge(p.getV1(), p.getV2());
+			this.graph.setEdgeWeight(this.graph.addEdge(p.getV1(), p.getV2()), p.getPeso());
+		}
 	}
 
 }

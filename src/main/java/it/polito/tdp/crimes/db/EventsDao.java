@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.polito.tdp.crimes.model.Event;
+import it.polito.tdp.crimes.model.Pair;
 
 public class EventsDao {
 
@@ -123,6 +124,43 @@ public class EventsDao {
 			while (res.next()) {
 				try {
 					list.add(res.getString("offense_type_id"));
+				} catch (Throwable t) {
+					t.printStackTrace();
+				}
+			}
+
+			conn.close();
+			return list;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static List<Pair> getPairs(String offenseCategoryId, Integer month) {
+		String sql = "SSELECT e1.offense_type_id, e2.offense_type_id,COUNT(DISTINCT e1.neighborhood_id) "
+				+ "FROM events AS e1, events AS e2 "
+				+ "WHERE e1.neighborhood_id=e2.neighborhood_id AND e1.offense_type_id<e2.offense_type_id AND "
+				+ "MONTH(e1.reported_date)=? AND MONTH(e2.reported_date)=? AND e1.offense_category_id=? AND e2.offense_category_id=? "
+				+ "group by e1.offense_type_id, e2.offense_type_id";
+		try {
+			Connection conn = DBConnect.getConnection();
+
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, month);
+			st.setInt(2, month);
+			st.setString(3, offenseCategoryId);
+			st.setString(4, offenseCategoryId);
+
+			List<Pair> list = new ArrayList<>();
+
+			ResultSet res = st.executeQuery();
+
+			while (res.next()) {
+				try {
+					list.add(new Pair(res.getString("e1.offense_type_id"), res.getString("e2.offense_type_id"),
+							res.getInt("COUNT(DISTINCT e1.neighborhood_id)")));
 				} catch (Throwable t) {
 					t.printStackTrace();
 				}
