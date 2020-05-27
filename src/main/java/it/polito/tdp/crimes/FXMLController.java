@@ -51,6 +51,8 @@ public class FXMLController {
 	@FXML
 	void doCreaGrafo(ActionEvent event) {
 
+		this.model.creaGrafo(this.boxCategoria.getValue(), this.boxMese.getValue());
+
 	}
 
 	@FXML // This method is called by the FXMLLoader when initialization is complete

@@ -106,4 +106,35 @@ public class EventsDao {
 
 	}
 
+	public static List<String> getTypeByCategoryAndMonth(String offenseCategoryId, Integer month) {
+		String sql = "SELECT DISTINCT offense_type_id " + "FROM EVENTS "
+				+ "WHERE MONTH(reported_date)= ? AND offense_category_id= ?";
+		try {
+			Connection conn = DBConnect.getConnection();
+
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, month);
+			st.setString(2, offenseCategoryId);
+
+			List<String> list = new ArrayList<>();
+
+			ResultSet res = st.executeQuery();
+
+			while (res.next()) {
+				try {
+					list.add(res.getString("offense_type_id"));
+				} catch (Throwable t) {
+					t.printStackTrace();
+				}
+			}
+
+			conn.close();
+			return list;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 }
