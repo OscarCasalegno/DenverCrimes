@@ -139,7 +139,7 @@ public class EventsDao {
 	}
 
 	public static List<Pair> getPairs(String offenseCategoryId, Integer month) {
-		String sql = "SSELECT e1.offense_type_id, e2.offense_type_id,COUNT(DISTINCT e1.neighborhood_id) "
+		String sql = "SELECT e1.offense_type_id, e2.offense_type_id,COUNT(DISTINCT e1.neighborhood_id) "
 				+ "FROM events AS e1, events AS e2 "
 				+ "WHERE e1.neighborhood_id=e2.neighborhood_id AND e1.offense_type_id<e2.offense_type_id AND "
 				+ "MONTH(e1.reported_date)=? AND MONTH(e2.reported_date)=? AND e1.offense_category_id=? AND e2.offense_category_id=? "

@@ -7,6 +7,8 @@ package it.polito.tdp.crimes;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import org.jgrapht.graph.DefaultWeightedEdge;
+
 import it.polito.tdp.crimes.model.Model;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -35,7 +37,7 @@ public class FXMLController {
 	private Button btnAnalisi; // Value injected by FXMLLoader
 
 	@FXML // fx:id="boxArco"
-	private ComboBox<?> boxArco; // Value injected by FXMLLoader
+	private ComboBox<DefaultWeightedEdge> boxArco; // Value injected by FXMLLoader
 
 	@FXML // fx:id="btnPercorso"
 	private Button btnPercorso; // Value injected by FXMLLoader
@@ -45,13 +47,38 @@ public class FXMLController {
 
 	@FXML
 	void doCalcolaPercorso(ActionEvent event) {
+		this.txtResult.clear();
 
+		DefaultWeightedEdge arco = this.boxArco.getValue();
+		if (arco == null) {
+			this.txtResult.appendText("SCEGLIERE UN ARCO");
+			return;
+		}
+
+		for (String s : this.model.path(arco)) {
+			this.txtResult.appendText(s + "\n");
+		}
 	}
 
 	@FXML
 	void doCreaGrafo(ActionEvent event) {
+		this.txtResult.clear();
 
-		this.model.creaGrafo(this.boxCategoria.getValue(), this.boxMese.getValue());
+		String cat = this.boxCategoria.getValue();
+		Integer mese = this.boxMese.getValue();
+
+		if (cat == null || mese == null) {
+			this.txtResult.appendText("SCEGLIERE UNA CATEGORIA DI REATO E UN MESE");
+			return;
+		}
+
+		this.model.creaGrafo(cat, mese);
+
+		for (DefaultWeightedEdge e : this.model.getEdges()) {
+			this.txtResult.appendText(e.toString() + " " + this.model.getW(e) + "\n");
+		}
+
+		this.boxArco.setItems(FXCollections.observableArrayList(this.model.getEdges()));
 
 	}
 
