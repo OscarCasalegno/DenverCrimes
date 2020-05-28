@@ -2,7 +2,6 @@ package it.polito.tdp.crimes.model;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -69,16 +68,17 @@ public class Model {
 		String source = this.graph.getEdgeSource(e);
 		String target = this.graph.getEdgeTarget(e);
 
+		// Genero un grafo ugauale al primo con il peso degli archi uguale a 0
 		Graph<String, DefaultWeightedEdge> doppio = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
 		Graphs.addAllVertices(doppio, this.graph.vertexSet());
-
-		Set<String> rim = new HashSet<>();
 
 		for (DefaultWeightedEdge ed : this.graph.edgeSet()) {
 			doppio.setEdgeWeight(doppio.addEdge(this.graph.getEdgeSource(ed), this.graph.getEdgeTarget(ed)), 0);
 		}
 
+		// rimuovo i vertici senza connessioni
+		Set<String> rim = new HashSet<>();
 		for (String d : doppio.vertexSet()) {
 			if (doppio.degreeOf(d) == 0)
 				rim.add(d);
@@ -86,8 +86,7 @@ public class Model {
 
 		doppio.removeAllVertices(rim);
 
-		doppio.removeEdge(source, target);
-
+		// rendo il grafo completo
 		for (String s : doppio.vertexSet()) {
 			for (String d : doppio.vertexSet()) {
 				if (!s.equals(d))
@@ -95,34 +94,21 @@ public class Model {
 			}
 		}
 
+		// trovo un ciclo euleriano che inizi da source e abbia come penultimo vertice
+		// il target
 		HamiltonianCycleAlgorithm<String, DefaultWeightedEdge> alg = new RandomTourTSP<>();
+		GraphPath<String, DefaultWeightedEdge> path;
 
-		GraphPath<String, DefaultWeightedEdge> path = alg.getTour(doppio);
+		do {
+			path = alg.getTour(doppio);
+		} while (!path.getStartVertex().equals(source)
+				|| !path.getVertexList().get(path.getVertexList().size() - 2).equals(target));
 
-		List<String> lista = new LinkedList<>();
-		boolean inizio = false;
+		// aggiusto la lista per renderlo un percorso e non un ciclo
+		List<String> list = path.getVertexList();
+		list.remove(list.size() - 1);
 
-		for (String s : path.getVertexList()) {
-			if (s.contentEquals(source)) {
-				inizio = true;
-			}
-
-			if (inizio) {
-				lista.add(s);
-			}
-		}
-
-		for (String s : path.getVertexList()) {
-			if (inizio && !lista.contains(s)) {
-				lista.add(s);
-			}
-
-			if (s.contentEquals(target)) {
-				inizio = false;
-			}
-		}
-
-		return lista;
+		return list;
 
 	}
 
